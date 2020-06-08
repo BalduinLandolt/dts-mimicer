@@ -2,14 +2,15 @@ import argparse
 
 
 def start():
-    parser = argparse.ArgumentParser(usage="DTS Mimicer.\nBy default, run server; for client, use flag.")
+    parser = argparse.ArgumentParser(usage="DTS Mimicer.\nBy default, run server; for client, use flag.\nDefault port: 17980")
     parser.add_argument("-c","--client", help="run client", action="store_true")
+    parser.add_argument("-p","--port", help="the port to run on", type=int, default=17980)
     args = parser.parse_args()
     if args.client:
-        print("Starting Client...")
+        print(f"Starting Client on Port {args.port}...")
         # TODO: start client
     else:
-        print("Starting Server...")
+        print(f"Starting Server on Port {args.port}...")
         # TODO: start server
 
 

@@ -1,1 +1,4 @@
 # Gitignore
+
+# pycache
+**/__pycache__/**
