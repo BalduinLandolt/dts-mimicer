@@ -9,7 +9,7 @@ class BaseEndpoint:
         self.__host_prefix = host_prefix
 
     @property
-    def entrypoint_reply(self):
+    def entrypoint_response(self):
         return {
             "@context": f"{self.__endpoint_path}contexts/EntryPoint.jsonld",
             "@id": self.absolute_path,
@@ -41,5 +41,5 @@ class BaseEndpoint:
         self.__collections.host_prefix = prefix
 
     @property
-    def collections_reply(self):
-        return self.__collections.collection_reply
+    def collections_response(self):
+        return self.__collections.collection_response

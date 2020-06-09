@@ -26,12 +26,12 @@ def home():
 
 @app.route(__endpoint_path)
 def entry_point():
-    return jsonify(__endpoint.entrypoint_reply)
+    return jsonify(__endpoint.entrypoint_response)
 
 
 @app.route(__endpoint.collections_path)
 def collections():
-    return jsonify(__endpoint.collections_reply)
+    return jsonify(__endpoint.collections_response)
 
 
 class DTSMServer:

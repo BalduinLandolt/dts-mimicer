@@ -9,7 +9,7 @@ class Collections:
         return self.__path
 
     @property
-    def collection_reply(self):  # TODO: make dynamic! (will need classes `Collection` and `Resource`)
+    def collection_response(self):  # TODO: make dynamic! (will need classes `Collection` and `Resource`)
         return {
             "@context": {
                 "@vocab": "https://www.w3.org/ns/hydra/core#",
