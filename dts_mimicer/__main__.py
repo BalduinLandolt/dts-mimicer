@@ -1,5 +1,5 @@
 import argparse
-from server.dtsm_server import DTSM_server
+from dtsm_server import DTSM_server
 
 
 def start():

@@ -1,5 +1,13 @@
 from flask import Flask
 
+
+app = Flask(__name__)
+#app.config["DEBUG"] = True
+
+@app.route("/")
+def home():
+    return "Hello World"
+
 class DTSM_server():
     """DTS Mimicer Server
     """
@@ -10,4 +18,5 @@ class DTSM_server():
         self.port = port
 
     def run(self):
-        pass
+        print("Running flask server")
+        app.run(port=self.port)
