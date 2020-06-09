@@ -35,10 +35,21 @@ def collections():
 
 
 class DTSMServer:
-    """DTS Mimicker Server
+    """DTS Mimicker Server.
+
+    A server that mimics the behavior of a "real" DTS server.
+    Intended for test purposes etc.
     """
 
     def __init__(self, host, port):
+        """`dtsmserver` constructor.
+
+        Generates an instance of `dtsmserver`.
+
+        Args:
+            host (str): the host prefix (e.g. "localhost" or "127.0.0.1")
+            port (int): the port to run on
+        """
         print("Initializing Server")
         super().__init__()
         self.host = host
@@ -46,5 +57,9 @@ class DTSMServer:
         set_host(f"http://{host}:{port}")
 
     def run(self):
+        """Run method.
+
+        Run the server.
+        """
         print("Running flask server")
         app.run(host=self.host, port=self.port)

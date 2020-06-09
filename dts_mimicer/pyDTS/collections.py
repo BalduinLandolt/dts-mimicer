@@ -1,3 +1,4 @@
+# TODO: add docstring
 class Collections:
 
     def __init__(self, path, prefix=""):

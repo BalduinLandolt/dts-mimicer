@@ -3,6 +3,18 @@ from dtsmserver import DTSMServer
 
 
 def start():
+    """Start DTS Mimicker.
+
+    This method starts the DTS (Distributed Text Services) Mimicker.
+
+    The method is called by the `main` loop in this file.
+
+    The following command line arguments are expected:
+
+        - `--client`/`-c` (if added, a client is started, instead of a server)
+        - `--port int`/`-p int` (the port to run on; default is 17980)
+        - `--host str`/`-ho str` (the host address to run on; default is 'localhost')
+    """
     parser = argparse.ArgumentParser(usage="DTS Mimicker.\n"
                                            "By default, run server; for client, use flag.\n"
                                            "Default host: localhost\n"
