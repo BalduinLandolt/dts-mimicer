@@ -1,5 +1,5 @@
 import argparse
-from dtsm_server import DTSM_server
+from dtsmserver import DTSMServer
 
 
 def start():
@@ -13,7 +13,7 @@ def start():
         # TODO: start client
     else:
         print(f"Starting Server on Port {args.port}...")
-        server = DTSM_server(port)
+        server = DTSMServer(port)
         server.run()
         # TODO: start server
 
