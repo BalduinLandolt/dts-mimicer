@@ -1,29 +1,32 @@
+from pyDTS.collections import Collections
+
+
 class BaseEndpoint:
 
+    def __init__(self, path="/dts/api/"):
+        self.__endpoint_path = path
+        self.__collections = Collections(self.endpoint_path + "collections/")
+        self.__reply = {
+            "@context": f"{self.__endpoint_path}contexts/EntryPoint.jsonld",
+            "@id": self.__endpoint_path,
+            "@type": "EntryPoint",
+            "collections": self.__collections.collection_path,
+            "documents": f"{self.__endpoint_path}documents/",
+            "navigation": f"{self.__endpoint_path}navigation/"
+        }
+
     @property
-    def reply(self):
-        return self._reply
+    def entrypoint_reply(self):
+        return self.__reply
 
     @property
     def endpoint_path(self):
-        return self._endpoint_path
+        return self.__endpoint_path
 
-    @endpoint_path.setter
-    def endpoint_path(self, path: str):
-        s = str(path)
-        if not s.startswith("/"):
-            s = "/" + path
-        if not s.endswith("/"):
-            path += "/"
-        self._endpoint_path = s
+    @property
+    def collections_path(self):
+        return self.__collections.collection_path
 
-    _endpoint_path = "/dts/api/"
-
-    _reply = {
-        "@context": f"{_endpoint_path}contexts/EntryPoint.jsonld",
-        "@id": _endpoint_path,
-        "@type": "EntryPoint",
-        "collections": f"{_endpoint_path}collections/",
-        "documents": f"{_endpoint_path}documents/",
-        "navigation": f"{_endpoint_path}navigation/"
-    }
+    @property
+    def collections_reply(self):
+        return self.__collections.collection_reply

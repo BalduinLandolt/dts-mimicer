@@ -1,25 +1,31 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from pyDTS.endpoint import BaseEndpoint
 
 
 app = Flask(__name__)
 # app.config["DEBUG"] = True
 
-_endpoint = BaseEndpoint()
-_endpoint_path = _endpoint.endpoint_path
-print(_endpoint_path)
+__endpoint = BaseEndpoint()
+__endpoint_path = __endpoint.endpoint_path
+print(__endpoint_path)
 
 
 @app.route("/")
 def home():
+    print(request.base_url)
     return f"<h1>DTS Mimicker</h1>" \
-           f"<div>Visit <a href=\"{_endpoint_path}\">the Base API Endpoint at {_endpoint_path}</a> " \
+           f"<div>Visit <a href=\"{__endpoint_path}\">the Base API Endpoint at {__endpoint_path}</a> " \
            f"for DTS functionality.</div>"
 
 
-@app.route(_endpoint_path)
+@app.route(__endpoint_path)
 def entry_point():
-    return jsonify(_endpoint.reply)
+    return jsonify(__endpoint.entrypoint_reply)
+
+
+@app.route(__endpoint.collections_path)
+def collections():
+    return jsonify(__endpoint.collections_reply)
 
 
 class DTSMServer:

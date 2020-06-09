@@ -15,7 +15,6 @@ def start():
         print(f"Starting Server on Port {args.port}...")
         server = DTSMServer(port)
         server.run()
-        # TODO: start server
 
 
 if __name__ == "__main__":
