@@ -2,15 +2,125 @@
 # TODO: add header with author and license to all files
 
 
+class Constants:
+
+    TYPE_COLLECTION = "Collection"
+
+    TYPE_RESOURCE = "Resource"
+
+    CONTEXT = {
+            "@vocab": "https://www.w3.org/ns/hydra/core#",
+            "dc": "http://purl.org/dc/terms/",
+            "dts": "https://w3id.org/dts/api#"
+        }
+
+
 class Collection:
     # TODO: make contents dynamic
 
-    def __init__(self, contents):
-        self.__contents = contents
+    def __init__(self, id, parent, children, type, title, description):
+        self.id = id
+        self.parent = parent
+        self.children = children
+        self.type = type
+        self.title = title
+        self.description = description
+        pass
 
     @property
-    def mapping(self):
-        return self.__contents
+    def response(self):
+        return {
+            "@context": Constants.CONTEXT,
+            "@id": self.id,
+            "totalItems": len(self.children) + len(self.parent),
+            "dts:totalParents": len(self.parent),
+            "dts:totalChildren": len(self.children),
+            "@type": self.type,
+            "title": self.title,
+            "description": self.description,
+            "member": self.members # -> null!
+        }
+    
+    @property
+    def member(self):
+        return {
+            "@id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "@type": self.type,
+            "totalItems": len(self.children) + len(self.parent),
+            "dts:totalParents": len(self.parent),
+            "dts:totalChildren": len(self.children)
+        }
+    
+    @property
+    def members(self):
+        res = []
+        res.extend(self.parent_member.copy())
+        res.extend(self.children_members.copy())
+        return res
+
+    @property
+    def parent_member(self):
+        if self.parent:
+            return self.parent.member
+        else:
+            return []
+
+    @property
+    def children_members(self):
+        if self.children:
+            return [c.member for c in self.children]
+        else:
+            return []
+
+    @property
+    def description(self):
+        return self.__description
+
+    @description.setter
+    def description(self, description):
+        self.__description = description
+
+    @property
+    def title(self):
+        return self.__title
+
+    @title.setter
+    def title(self, title):
+        self.__title = title
+
+    @property
+    def type(self):
+        return self.__type
+
+    @type.setter
+    def type(self, type):
+        self.__type = type
+
+    @property
+    def children(self):
+        return self.__children
+
+    @children.setter
+    def children(self, children):
+        self.__children = children
+
+    @property
+    def id(self):
+        return self.__id
+
+    @id.setter
+    def id(self, id):
+        self.__id = id
+
+    @property
+    def parent(self):
+        return self.__parent
+
+    @parent.setter
+    def parent(self, parent):
+        self.__parent = parent
 
 
 class Resource:
@@ -29,36 +139,18 @@ class Collections:
     See https://distributed-text-services.github.io/specifications/Collections-Endpoint.html
     """
 
-    # TODO: make root collection a Collection, instead of hard coding it into Collections
-
     def __init__(self, path, prefix=""):
         self.__path = path
         self.host_prefix = prefix
-        self.__children = []
-        self.__generate_children()
-        self.__parents = []
+        self.__root = self.__generate_root()
 
     @property
     def collection_path(self):
         return self.__path
 
     @property
-    def collection_response(self):  # TODO: make dynamic! (will need classes `Collection` and `Resource`)
-        return {
-            "@context": {
-                "@vocab": "https://www.w3.org/ns/hydra/core#",
-                "dc": "http://purl.org/dc/terms/",
-                "dts": "https://w3id.org/dts/api#"
-            },
-            "@id": "root_collection",
-            "totalItems": len(self.__children) + len(self.__parents),
-            "dts:totalParents": len(self.__parents),
-            "dts:totalChildren": len(self.__children),
-            "@type": "Collection",
-            "title": "A sample collection made up for this mimicker",
-            "description": "Contains two sample children",
-            "mapping": self.__get_children_mappings()
-        }
+    def collection_response(self):
+        return self.__root.response
 
     @property
     def host_prefix(self):
@@ -75,24 +167,34 @@ class Collections:
         return p
 
     def __get_children_mappings(self):
-        return [c.mapping for c in self.__children]
+        return [c.members for c in self.__children]
 
     def __generate_children(self):
-        content = {"@id": "sample_01",
-                   "title": "Sample 01",
-                   "description": "First sample Collection",
-                   "@type": "Collection",
-                   "totalItems": 1,
-                   "dts:totalParents": 1,
-                   "dts:totalChildren": 1}
-        child = Collection(content)
-        self.__children.append(child)
-        content = {"@id": "sample_02",
-                   "title": "Sample 02",
-                   "description": "Second sample Collection",
-                   "@type": "Collection",
-                   "totalItems": 1,
-                   "dts:totalParents": 1,
-                   "dts:totalChildren": 1}
-        child = Collection(content)
-        self.__children.append(child)
+        return [
+            Collection(
+                id="sample_01",
+                parent=[self],
+                children=[],
+                type=Constants.TYPE_COLLECTION,
+                title="Sample 01",
+                description="First sample Collection"
+            ),
+            Collection(
+                id="sample_02",
+                parent=[self],
+                children=[],
+                type=Constants.TYPE_COLLECTION,
+                title="Sample 02",
+                description="Second sample Collection"
+            )
+        ]
+
+    def __generate_root(self):
+        return Collection(
+            id="root_collection",
+            parent=[],
+            children=self.__generate_children(),
+            type=Constants.TYPE_COLLECTION,
+            title="Root Collection",
+            description="A Sample Root Collection"
+        )
