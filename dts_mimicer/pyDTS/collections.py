@@ -29,11 +29,14 @@ class Collections:
     See https://distributed-text-services.github.io/specifications/Collections-Endpoint.html
     """
 
+    # TODO: make root collection a Collection, instead of hard coding it into Collections
+
     def __init__(self, path, prefix=""):
         self.__path = path
         self.host_prefix = prefix
         self.__children = []
         self.__generate_children()
+        self.__parents = []
 
     @property
     def collection_path(self):
@@ -47,10 +50,10 @@ class Collections:
                 "dc": "http://purl.org/dc/terms/",
                 "dts": "https://w3id.org/dts/api#"
             },
-            "@id": "sample_collection",
-            "totalItems": 2,
-            "dts:totalParents": 0,
-            "dts:totalChildren": 2,
+            "@id": "root_collection",
+            "totalItems": len(self.__children) + len(self.__parents),
+            "dts:totalParents": len(self.__parents),
+            "dts:totalChildren": len(self.__children),
             "@type": "Collection",
             "title": "A sample collection made up for this mimicker",
             "description": "Contains two sample children",
