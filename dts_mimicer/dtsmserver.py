@@ -13,6 +13,8 @@ print(__endpoint_path)
 def set_host(host_path):
     __endpoint.host_prefix = host_path
 
+# TODO: handle request parameters
+# TODO: handle GET, POST, etc. separately
 
 @app.route("/")
 def home():

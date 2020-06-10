@@ -3,20 +3,18 @@
 
 
 class Constants:
-
     TYPE_COLLECTION = "Collection"
 
     TYPE_RESOURCE = "Resource"
 
     CONTEXT = {
-            "@vocab": "https://www.w3.org/ns/hydra/core#",
-            "dc": "http://purl.org/dc/terms/",
-            "dts": "https://w3id.org/dts/api#"
-        }
+        "@vocab": "https://www.w3.org/ns/hydra/core#",
+        "dc": "http://purl.org/dc/terms/",
+        "dts": "https://w3id.org/dts/api#"
+    }
 
 
 class Collection:
-    # TODO: make contents dynamic
 
     def __init__(self, id, parent, children, type, title, description):
         self.id = id
@@ -32,15 +30,15 @@ class Collection:
         return {
             "@context": Constants.CONTEXT,
             "@id": self.id,
-            "totalItems": len(self.children) + len(self.parent),
+            "totalItems": len(self.children) + len(self.parent), # FIXME: should be either or, depending on nav parameter
             "dts:totalParents": len(self.parent),
             "dts:totalChildren": len(self.children),
             "@type": self.type,
             "title": self.title,
             "description": self.description,
-            "member": self.members # -> null!
+            "member": self.members  # -> null!
         }
-    
+
     @property
     def member(self):
         return {
@@ -48,11 +46,11 @@ class Collection:
             "title": self.title,
             "description": self.description,
             "@type": self.type,
-            "totalItems": len(self.children) + len(self.parent),
+            "totalItems": len(self.children) + len(self.parent), # FIXME: see above
             "dts:totalParents": len(self.parent),
             "dts:totalChildren": len(self.children)
         }
-    
+
     @property
     def members(self):
         res = []
@@ -170,23 +168,21 @@ class Collections:
         return [c.members for c in self.__children]
 
     def __generate_children(self):
+        col_1 = Collection(id="sample_01",
+                           parent=[self],
+                           children=[],
+                           type=Constants.TYPE_COLLECTION,
+                           title="Sample 01",
+                           description="First sample Collection")
+        col_2 = Collection(id="sample_02",
+                           parent=[self],
+                           children=[],
+                           type=Constants.TYPE_COLLECTION,
+                           title="Sample 02",
+                           description="Second sample Collection")
         return [
-            Collection(
-                id="sample_01",
-                parent=[self],
-                children=[],
-                type=Constants.TYPE_COLLECTION,
-                title="Sample 01",
-                description="First sample Collection"
-            ),
-            Collection(
-                id="sample_02",
-                parent=[self],
-                children=[],
-                type=Constants.TYPE_COLLECTION,
-                title="Sample 02",
-                description="Second sample Collection"
-            )
+            col_1,
+            col_2
         ]
 
     def __generate_root(self):
