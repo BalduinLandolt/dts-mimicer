@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 from pyDTS.endpoint import BaseEndpoint
 
 
@@ -16,8 +16,10 @@ def set_host(host_path):
 # TODO: handle request parameters
 # TODO: handle GET, POST, etc. separately
 
+
 @app.route("/")
 def home():
+    # ony GET allowed
     entry = "" + request.base_url + __endpoint_path
     entry = entry.replace("//", "/")
     return f"<h1>DTS Mimicker</h1>" \
@@ -28,12 +30,14 @@ def home():
 
 @app.route(__endpoint_path)
 def entry_point():
-    return jsonify(__endpoint.entrypoint_response)
+    # ony GET allowed
+    return make_response(jsonify(__endpoint.entrypoint_response), 200)
 
 
 @app.route(__endpoint.collections_path)
 def collections():
-    return jsonify(__endpoint.collections_response)
+    # ony GET allowed
+    return make_response(jsonify(__endpoint.collections_response), 200)
 
 
 class DTSMServer:
