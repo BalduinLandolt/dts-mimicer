@@ -1,4 +1,4 @@
-from pyDTS.collections import Collections
+from pyDTS.collections import Collections, Constants
 
 
 class BaseEndpoint:
@@ -93,13 +93,17 @@ class BaseEndpoint:
         self.__host_prefix = prefix
         self.__collections.host_prefix = prefix
 
-    @property
-    def collections_response(self):
+    def get_collections_response(self, id=None, page=None, nav=Constants.NAV_CHILDREN):
         """Collections Response
 
         Property to forward the collections' response.
 
+        Args:
+            id (str): id from query, if applicable; `None` otherwise. Defaults to `None`.
+            page (str): page from query, if applicable; `None` otherwise. Defaults to `None`.
+            nav (str): navigation parameter from query; either "children" or "parents". Defaults to "children.
+
         Returns:
             dict: JSON style response.
         """
-        return self.__collections.collection_response
+        return self.__collections.get_collection_response(id, page, nav)

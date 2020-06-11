@@ -35,9 +35,18 @@ def entry_point():
 
 
 @app.route(__endpoint.collections_path)
-def collections():
+def collections(): # TODO: add query parameters
     # ony GET allowed
-    return make_response(jsonify(__endpoint.collections_response), 200)
+    id_arg = None
+    if "id" in request.args:
+        id_arg = request.args["id"]
+    page_arg = None
+    if "page" in request.args:
+        page_arg = request.args["page"]
+    if "nav" in request.args:
+        nav_arg = request.args["nav"]
+        return make_response(jsonify(__endpoint.get_collections_response(id=id_arg, page=page_arg, nav=nav_arg)), 200)
+    return make_response(jsonify(__endpoint.get_collections_response(id=id_arg, page=page_arg)), 200)
 
 
 class DTSMServer:

@@ -15,6 +15,10 @@ class Constants:
         "dts": "https://w3id.org/dts/api#"
     }
 
+    NAV_CHILDREN = "children"
+
+    NAV_PARENTS = "parents"
+
 
 class AbstractCollectionItem(ABC):
     def __init__(self, id, parent, children, type, title, description):
@@ -92,7 +96,7 @@ class AbstractCollectionItem(ABC):
         self.__parent = parent
 
     def match_id(self, id):
-        return self.id == id
+        return self.id == id  # TODO: should I also allow fuzzy match?
 
 
 class Collection(AbstractCollectionItem):
@@ -170,10 +174,6 @@ class Collections:
         return self.__path
 
     @property
-    def collection_response(self):
-        return self.__root.response
-
-    @property
     def host_prefix(self):
         return self.__host_prefix
 
@@ -217,3 +217,8 @@ class Collections:
             title="Root Collection",
             description="A Sample Root Collection"
         )
+
+    def get_collection_response(self, id, page, nav):
+        print(f"id: {id} - page: {page} - nav: {nav}")
+        # TODO: use query params
+        return self.__root.response
