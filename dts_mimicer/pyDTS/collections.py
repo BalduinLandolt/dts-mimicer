@@ -1,7 +1,8 @@
+from abc import ABC, abstractmethod
+
 # TODO: add docstring
 # TODO: add header with author and license to all files
 
-# TODO: use abstract class to unify Collection and Resource
 
 class Constants:
     TYPE_COLLECTION = "Collection"
@@ -15,8 +16,7 @@ class Constants:
     }
 
 
-class Collection:
-
+class AbstractCollectionItem(ABC):
     def __init__(self, id, parent, children, type, title, description):
         self.id = id
         self.parent = parent
@@ -28,39 +28,6 @@ class Collection:
 
     def __str__(self):
         return f"<{self.type}: {self.id} -- {self.title} -- {self.description}>"
-
-    @property
-    def response(self):
-        return {
-            "@context": Constants.CONTEXT,
-            "@id": self.id,
-            "totalItems": len(self.children) + len(self.parent), # FIXME: should be either or, depending on nav parameter
-            "dts:totalParents": len(self.parent),
-            "dts:totalChildren": len(self.children),
-            "@type": self.type,
-            "title": self.title,
-            "description": self.description,
-            "member": self.members  # -> null!
-        }
-
-    @property
-    def member(self):
-        return {
-            "@id": self.id,
-            "title": self.title,
-            "description": self.description,
-            "@type": self.type,
-            "totalItems": len(self.children) + len(self.parent), # FIXME: see above
-            "dts:totalParents": len(self.parent),
-            "dts:totalChildren": len(self.children)
-        }
-
-    @property
-    def members(self):
-        res = []
-        res.extend(self.parent_member.copy())
-        res.extend(self.children_members.copy())
-        return res
 
     @property
     def parent_member(self):
@@ -128,7 +95,44 @@ class Collection:
         return self.id == id
 
 
-class Resource:
+class Collection(AbstractCollectionItem):
+    # TODO: check, which further methods can be made abstract
+
+    @property
+    def response(self):
+        return {
+            "@context": Constants.CONTEXT,
+            "@id": self.id,
+            "totalItems": len(self.children) + len(self.parent), # FIXME: should be either or, depending on nav parameter
+            "dts:totalParents": len(self.parent),
+            "dts:totalChildren": len(self.children),
+            "@type": self.type,
+            "title": self.title,
+            "description": self.description,
+            "member": self.members  # -> null!
+        }
+
+    @property
+    def member(self):
+        return {
+            "@id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "@type": self.type,
+            "totalItems": len(self.children) + len(self.parent), # FIXME: see above
+            "dts:totalParents": len(self.parent),
+            "dts:totalChildren": len(self.children)
+        }
+
+    @property
+    def members(self): # FIXME: see above
+        res = []
+        res.extend(self.parent_member.copy())
+        res.extend(self.children_members.copy())
+        return res
+
+
+class Resource(AbstractCollectionItem):
     # TODO: implement
     pass
 
