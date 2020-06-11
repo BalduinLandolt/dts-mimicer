@@ -1,6 +1,7 @@
 # TODO: add docstring
 # TODO: add header with author and license to all files
 
+# TODO: use abstract class to unify Collection and Resource
 
 class Constants:
     TYPE_COLLECTION = "Collection"
@@ -23,7 +24,10 @@ class Collection:
         self.type = type
         self.title = title
         self.description = description
-        pass
+        Collections.register_collection(self)
+
+    def __str__(self):
+        return f"<{self.type}: {self.id} -- {self.title} -- {self.description}>"
 
     @property
     def response(self):
@@ -120,6 +124,9 @@ class Collection:
     def parent(self, parent):
         self.__parent = parent
 
+    def match_id(self, id):
+        return self.id == id
+
 
 class Resource:
     # TODO: implement
@@ -136,6 +143,18 @@ class Collections:
 
     See https://distributed-text-services.github.io/specifications/Collections-Endpoint.html
     """
+
+    __registered_collections = []
+
+    @staticmethod
+    def register_collection(collection):
+        Collections.__registered_collections.append(collection)
+
+    @staticmethod
+    def get_collection(id):
+        for c in Collections.__registered_collections:
+            if c.match_id(id):
+                return c
 
     def __init__(self, path, prefix=""):
         self.__path = path
