@@ -27,7 +27,7 @@ def start():
     port = args.port
     if args.client:
         print(f"Starting Client on Port {port}...")
-        # TODO: start client
+        # LATER: start client
     else:
         print(f"Starting Server on Port {args.port}...")
         server = DTSMServer(host, port)

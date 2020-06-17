@@ -26,7 +26,7 @@ class BaseEndpoint:
     def entrypoint_response(self):
         """Entrypoint Response.
 
-        Property organizing the response of the entry point.
+        Property organizing the get_response of the entry point.
 
         Returns:
             dict: JSON style (jsonifyable) key-value-pairs.
@@ -36,8 +36,8 @@ class BaseEndpoint:
             "@id": self.absolute_path,
             "@type": "EntryPoint",
             "collections": self.__collections.absolute_path,
-            "documents": f"{self.__endpoint_path}documents/",   # TODO: implement
-            "navigation": f"{self.__endpoint_path}navigation/"  # TODO: implement
+            "documents": f"{self.__endpoint_path}documents/",   # LATER: implement
+            "navigation": f"{self.__endpoint_path}navigation/"  # LATER: implement
         }
 
     @property
@@ -96,7 +96,7 @@ class BaseEndpoint:
     def get_collections_response(self, id=None, page=None, nav=Constants.NAV_CHILDREN):
         """Collections Response
 
-        Property to forward the collections' response.
+        Property to forward the collections' get_response.
 
         Args:
             id (str): id from query, if applicable; `None` otherwise. Defaults to `None`.
@@ -104,6 +104,6 @@ class BaseEndpoint:
             nav (str): navigation parameter from query; either "children" or "parents". Defaults to "children.
 
         Returns:
-            dict: JSON style response.
+            dict: JSON style get_response.
         """
         return self.__collections.get_collection_response(id, page, nav)

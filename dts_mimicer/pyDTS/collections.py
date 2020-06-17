@@ -36,14 +36,14 @@ class AbstractCollectionItem(ABC):
     @property
     def parent_member(self):
         if self.parent:
-            return self.parent.member
+            return self.parent.get_member(Constants.NAV_PARENTS)
         else:
             return []
 
     @property
     def children_members(self):
         if self.children:
-            return [c.member for c in self.children]
+            return [c.get_member(Constants.NAV_CHILDREN) for c in self.children]
         else:
             return []
 
@@ -96,44 +96,41 @@ class AbstractCollectionItem(ABC):
         self.__parent = parent
 
     def match_id(self, id):
-        return self.id == id  # TODO: should I also allow fuzzy match?
+        return self.id == id  # QUESTION: should I also allow fuzzy match?
 
 
 class Collection(AbstractCollectionItem):
     # TODO: check, which further methods can be made abstract
 
-    @property
-    def response(self):
+    def get_response(self, id, page, nav):
         return {
             "@context": Constants.CONTEXT,
             "@id": self.id,
-            "totalItems": len(self.children) + len(self.parent), # FIXME: should be either or, depending on nav parameter
+            "totalItems": len(self.children) if nav == Constants.NAV_CHILDREN else len(self.parent),
             "dts:totalParents": len(self.parent),
             "dts:totalChildren": len(self.children),
             "@type": self.type,
             "title": self.title,
             "description": self.description,
-            "member": self.members  # -> null!
+            "member": self.get_members(nav)
         }
 
-    @property
-    def member(self):
+    def get_member(self, nav):
         return {
             "@id": self.id,
             "title": self.title,
             "description": self.description,
             "@type": self.type,
-            "totalItems": len(self.children) + len(self.parent), # FIXME: see above
+            "totalItems": len(self.children) if nav == Constants.NAV_CHILDREN else len(self.parent),
             "dts:totalParents": len(self.parent),
             "dts:totalChildren": len(self.children)
         }
 
-    @property
-    def members(self): # FIXME: see above
-        res = []
-        res.extend(self.parent_member.copy())
-        res.extend(self.children_members.copy())
-        return res
+    def get_members(self, nav):
+        if nav == Constants.NAV_CHILDREN:
+            return self.children_members
+        else:
+            return self.parent_member
 
 
 class Resource(AbstractCollectionItem):
@@ -188,7 +185,7 @@ class Collections:
         return p
 
     def __get_children_mappings(self):
-        return [c.members for c in self.__children]
+        return [c.get_members for c in self.__children]
 
     def __generate_children(self):
         col_1 = Collection(id="sample_01",
@@ -219,6 +216,5 @@ class Collections:
         )
 
     def get_collection_response(self, id, page, nav):
-        print(f"id: {id} - page: {page} - nav: {nav}")
-        # TODO: use query params
-        return self.__root.response
+        print(f"id: {id} - page: {page} - nav: {nav}") # TODO: remove eventually
+        return self.__root.get_response(id, page, nav)
