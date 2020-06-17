@@ -1,4 +1,6 @@
 from flask import Flask, jsonify, request, make_response
+
+from pyDTS.collections import Constants
 from pyDTS.endpoint import BaseEndpoint
 
 app = Flask(__name__)
@@ -48,7 +50,7 @@ def entry_point():
 
 
 @app.route(__endpoint.collections_path)
-def collections(): # TODO: add query parameters
+def collections():
     # ony GET allowed
     id_arg = None
     if "id" in request.args:
@@ -56,10 +58,10 @@ def collections(): # TODO: add query parameters
     page_arg = None
     if "page" in request.args:
         page_arg = request.args["page"]
+    nav_arg = Constants.NAV_CHILDREN
     if "nav" in request.args:
         nav_arg = request.args["nav"]
-        return make_response(jsonify(__endpoint.get_collections_response(id=id_arg, page=page_arg, nav=nav_arg)), 200)
-    return make_response(jsonify(__endpoint.get_collections_response(id=id_arg, page=page_arg)), 200)
+    return make_response(jsonify(__endpoint.get_collections_response(id=id_arg, page=page_arg, nav=nav_arg)), 200)
 
 
 class DTSMServer:
