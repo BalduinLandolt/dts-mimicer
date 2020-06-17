@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 # TODO: add docstring
 # TODO: add header with author and license to all files
 
@@ -36,7 +37,8 @@ class AbstractCollectionItem(ABC):
     @property
     def parent_member(self):
         if self.parent:
-            return self.parent.get_member(Constants.NAV_PARENTS)
+            par = self.parent[0]
+            return par.get_member(Constants.NAV_PARENTS)
         else:
             return []
 
@@ -100,9 +102,17 @@ class AbstractCollectionItem(ABC):
 
 
 class Collection(AbstractCollectionItem):
+    def __init__(self, id, parent, children, title, description):
+        super(Collection, self).__init__(id=id,
+                                         parent=parent,
+                                         children=children,
+                                         type=Constants.TYPE_COLLECTION,
+                                         title=title,
+                                         description=description)
+
     # TODO: check, which further methods can be made abstract
 
-    def get_response(self, id, page, nav):
+    def get_response(self, page, nav):
         return {
             "@context": Constants.CONTEXT,
             "@id": self.id,
@@ -132,10 +142,48 @@ class Collection(AbstractCollectionItem):
         else:
             return self.parent_member
 
+    def add_child(self, child):
+        self.children.append(child)
+
 
 class Resource(AbstractCollectionItem):
-    # TODO: implement
-    pass
+    def __init__(self, id, parent, title, description):
+        super(Resource, self).__init__(id=id,
+                                       parent=parent,
+                                       children=[],
+                                       type=Constants.TYPE_RESOURCE,
+                                       title=title,
+                                       description=description)
+
+    def get_response(self, page, nav):  # TODO: make resource specific
+        return {
+            "@context": Constants.CONTEXT,
+            "@id": self.id,
+            "totalItems": len(self.children) if nav == Constants.NAV_CHILDREN else len(self.parent),
+            "dts:totalParents": len(self.parent),
+            "dts:totalChildren": len(self.children),
+            "@type": self.type,
+            "title": self.title,
+            "description": self.description,
+            "member": self.get_members(nav)
+        }
+
+    def get_member(self, nav):  # TODO: make resource specific
+        return {
+            "@id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "@type": self.type,
+            "totalItems": len(self.children) if nav == Constants.NAV_CHILDREN else len(self.parent),
+            "dts:totalParents": len(self.parent),
+            "dts:totalChildren": len(self.children)
+        }
+
+    def get_members(self, nav):  # TODO: make resource specific
+        if nav == Constants.NAV_CHILDREN:
+            return self.children_members
+        else:
+            return self.parent_member
 
 
 class Collections:
@@ -189,32 +237,42 @@ class Collections:
 
     def __generate_children(self):
         col_1 = Collection(id="sample_01",
-                           parent=[self],
+                           parent=[],
                            children=[],
-                           type=Constants.TYPE_COLLECTION,
                            title="Sample 01",
                            description="First sample Collection")
         col_2 = Collection(id="sample_02",
-                           parent=[self],
+                           parent=[],
                            children=[],
-                           type=Constants.TYPE_COLLECTION,
                            title="Sample 02",
                            description="Second sample Collection")
+        res_1 = Resource(id="sample_res_01",
+                         parent=[col_1],
+                         title="Sample Resource 1",
+                         description="Sample Textual Resource")
+        col_1.add_child(res_1)
         return [
             col_1,
             col_2
         ]
 
     def __generate_root(self):
-        return Collection(
+        children = self.__generate_children()
+        root = Collection(
             id="root_collection",
             parent=[],
-            children=self.__generate_children(),
-            type=Constants.TYPE_COLLECTION,
+            children=children,
             title="Root Collection",
-            description="A Sample Root Collection"
-        )
+            description="A Sample Root Collection")
+        for c in children:
+            c.parent = [root]
+        return root
 
     def get_collection_response(self, id, page, nav):
-        print(f"id: {id} - page: {page} - nav: {nav}") # TODO: remove eventually
-        return self.__root.get_response(id, page, nav)
+        # TODO: actually handle page
+        print(f"id: {id} - page: {page} - nav: {nav}")  # LATER: remove eventually
+        if id:
+            col = self.get_collection(id)
+        else:
+            col = self.__root
+        return col.get_response(page, nav)
