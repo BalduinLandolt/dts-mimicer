@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, request, make_response
 from pyDTS.endpoint import BaseEndpoint
 
-
 app = Flask(__name__)
 # app.config["DEBUG"] = True
 
@@ -22,10 +21,24 @@ def home():
     # ony GET allowed
     entry = "" + request.base_url + __endpoint_path
     entry = entry.replace("//", "/")
+
+    epc = __endpoint.collections_path
+    qm = "?"
+    et = "&"
+    nav_parent = "nav=parent"
+    id_01 = "id=sample_01"
+    pg_01 = "page=1"
     return f"<h1>DTS Mimicker</h1>" \
            f"<div>Visit <a href=\"{__endpoint_path}\">the Base API Endpoint</a> " \
            f"at <a href=\"{__endpoint_path}\">{entry}</a> " \
-           f"for DTS functionality.</div>"
+           f"for DTS functionality.</div>" \
+           f"<h4>Sample Queries:</h4><div>" \
+           f"<p>Click on one of the following Links</p><ul>" \
+           f"<li><a href=\"{epc}\">{epc}</a></li>" \
+           f"<li><a href=\"{epc+qm+id_01}\">{epc+qm+id_01}</a></li>" \
+           f"<li><a href=\"{epc+qm+id_01+et+nav_parent}\">{epc+qm+id_01+et+nav_parent}</a></li>" \
+           f"<li><a href=\"{epc+qm+id_01+et+pg_01}\">{epc+qm+id_01+et+pg_01}</a></li>" \
+           f"</ul></div>"
 
 
 @app.route(__endpoint_path)
