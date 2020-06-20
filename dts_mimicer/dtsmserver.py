@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request, make_response
 
-from pyDTS.collections import Constants
+from pyDTS.constants import CollectionsConstants
 from pyDTS.endpoint import BaseEndpoint
 
 app = Flask(__name__)
@@ -57,7 +57,7 @@ def collections():
     page_arg = None
     if "page" in request.args:
         page_arg = request.args["page"]
-    nav_arg = Constants.NAV_CHILDREN
+    nav_arg = CollectionsConstants.NAV_CHILDREN
     if "nav" in request.args:
         nav_arg = request.args["nav"]
     return make_response(jsonify(__endpoint.get_collections_response(id=id_arg, page=page_arg, nav=nav_arg)), 200)

@@ -1,24 +1,13 @@
-from abc import ABC, abstractmethod
+from abc import ABC
+from pyDTS.constants import CollectionsConstants, EndpointConstants
 
+
+# QUESTION: Does Resource have members? might be relevant when navigation "parent"
+
+# LATER: missing attributes: dublincore, extensions
 
 # TODO: add docstring
 # TODO: add header with author and license to all files
-
-
-class Constants:
-    TYPE_COLLECTION = "Collection"
-
-    TYPE_RESOURCE = "Resource"
-
-    CONTEXT = {
-        "@vocab": "https://www.w3.org/ns/hydra/core#",
-        "dc": "http://purl.org/dc/terms/",
-        "dts": "https://w3id.org/dts/api#"
-    }
-
-    NAV_CHILDREN = "children"
-
-    NAV_PARENTS = "parents"
 
 
 class AbstractCollectionItem(ABC):
@@ -38,14 +27,14 @@ class AbstractCollectionItem(ABC):
     def parent_member(self):
         if self.parent:
             par = self.parent[0]
-            return par.get_member(Constants.NAV_PARENTS)
+            return par.get_member(CollectionsConstants.NAV_PARENTS)
         else:
             return []
 
     @property
     def children_members(self):
         if self.children:
-            return [c.get_member(Constants.NAV_CHILDREN) for c in self.children]
+            return [c.get_member(CollectionsConstants.NAV_CHILDREN) for c in self.children]
         else:
             return []
 
@@ -106,7 +95,7 @@ class Collection(AbstractCollectionItem):
         super(Collection, self).__init__(id=id,
                                          parent=parent,
                                          children=children,
-                                         type=Constants.TYPE_COLLECTION,
+                                         type=CollectionsConstants.TYPE_COLLECTION,
                                          title=title,
                                          description=description)
 
@@ -114,30 +103,30 @@ class Collection(AbstractCollectionItem):
 
     def get_response(self, page, nav):
         return {
-            "@context": Constants.CONTEXT,
+            "@context": CollectionsConstants.CONTEXT,
             "@id": self.id,
-            "totalItems": len(self.children) if nav == Constants.NAV_CHILDREN else len(self.parent),
-            "dts:totalParents": len(self.parent),
-            "dts:totalChildren": len(self.children),
             "@type": self.type,
             "title": self.title,
             "description": self.description,
+            "totalItems": len(self.children) if nav == CollectionsConstants.NAV_CHILDREN else len(self.parent),
+            "dts:totalParents": len(self.parent),
+            "dts:totalChildren": len(self.children),
             "member": self.get_members(nav)
         }
 
     def get_member(self, nav):
         return {
             "@id": self.id,
+            "@type": self.type,
             "title": self.title,
             "description": self.description,
-            "@type": self.type,
-            "totalItems": len(self.children) if nav == Constants.NAV_CHILDREN else len(self.parent),
+            "totalItems": len(self.children) if nav == CollectionsConstants.NAV_CHILDREN else len(self.parent),
             "dts:totalParents": len(self.parent),
             "dts:totalChildren": len(self.children)
         }
 
     def get_members(self, nav):
-        if nav == Constants.NAV_CHILDREN:
+        if nav == CollectionsConstants.NAV_CHILDREN:
             return self.children_members
         else:
             return self.parent_member
@@ -151,39 +140,80 @@ class Resource(AbstractCollectionItem):
         super(Resource, self).__init__(id=id,
                                        parent=parent,
                                        children=[],
-                                       type=Constants.TYPE_RESOURCE,
+                                       type=CollectionsConstants.TYPE_RESOURCE,
                                        title=title,
                                        description=description)
 
-    def get_response(self, page, nav):  # TODO: make resource specific
+    def get_response(self, page, nav):
         return {
-            "@context": Constants.CONTEXT,
+            "@context": CollectionsConstants.CONTEXT,
             "@id": self.id,
-            "totalItems": len(self.children) if nav == Constants.NAV_CHILDREN else len(self.parent),
+            "@type": self.type,
+            "title": self.title,
+            "description": self.description,
+            "totalItems": len(self.children) if nav == CollectionsConstants.NAV_CHILDREN else len(self.parent),
             "dts:totalParents": len(self.parent),
             "dts:totalChildren": len(self.children),
-            "@type": self.type,
-            "title": self.title,
-            "description": self.description,
-            "member": self.get_members(nav)
+            "dts:passage": self.passage,
+            "dts:references": self.references,
+            "dts:download": self.download,
+            "dts:citeDepth": self.cite_depth,  # TODO: add
+            "dts:citeStructure": self.cite_structure  # TODO: add
+            # "member": self.get_members(nav)
         }
 
-    def get_member(self, nav):  # TODO: make resource specific
-        return {
-            "@id": self.id,
-            "title": self.title,
-            "description": self.description,
-            "@type": self.type,
-            "totalItems": len(self.children) if nav == Constants.NAV_CHILDREN else len(self.parent),
-            "dts:totalParents": len(self.parent),
-            "dts:totalChildren": len(self.children)
-        }
+    # def get_member(self, nav):  # TODO: make resource specific
+    #     return {
+    #         "@id": self.id,
+    #         "title": self.title,
+    #         "description": self.description,
+    #         "@type": self.type,
+    #         "totalItems": len(self.children) if nav == Constants.NAV_CHILDREN else len(self.parent),
+    #         "dts:totalParents": len(self.parent),
+    #         "dts:totalChildren": len(self.children)
+    #     }
+
+    @property
+    def passage(self):
+        return EndpointConstants.get_documents_path() + "?id=" + self.id
+
+    @property
+    def references(self):
+        return EndpointConstants.get_navigation_path() + "?id=" + self.id
+
+    @property
+    def download(self):
+        return "todo!"  # TODO: add
+
+    @property
+    def cite_depth(self):
+        return "todo!"  # TODO: add
+
+    @property
+    def cite_structure(self):
+        return "todo!"  # TODO: add
 
     def get_members(self, nav):  # TODO: make resource specific
-        if nav == Constants.NAV_CHILDREN:
+        if nav == CollectionsConstants.NAV_CHILDREN:
             return self.children_members
         else:
             return self.parent_member
+
+    def get_member(self, nav):
+        return {
+            "@id": self.id,
+            "@type": self.type,
+            "title": self.title,
+            "description": self.description,
+            "totalItems": len(self.children) if nav == CollectionsConstants.NAV_CHILDREN else len(self.parent),
+            "dts:totalParents": len(self.parent),
+            "dts:totalChildren": len(self.children),
+            "dts:passage": self.passage,  # TODO: correct?
+            "dts:references": self.references,  # TODO: correct?
+            "dts:download": self.download,  # TODO: add
+            "dts:citeDepth": self.cite_depth,  # TODO: add
+            "dts:citeStructure": self.cite_structure  # TODO: add
+        }
 
 
 class Collections:
@@ -209,27 +239,24 @@ class Collections:
             if c.match_id(id):
                 return c
 
-    def __init__(self, path, prefix=""):
-        self.__path = path
-        self.host_prefix = prefix
+    def __init__(self):
         self.__root = self.__generate_root()
 
     @property
     def collection_path(self):
-        return self.__path
+        return EndpointConstants.get_collections_path()
 
     @property
     def host_prefix(self):
-        return self.__host_prefix
+        return EndpointConstants.get_host_prefix()
 
     @host_prefix.setter
     def host_prefix(self, prefix):
-        self.__host_prefix = prefix
+        EndpointConstants.set_host_prefix(prefix)
 
     @property
     def absolute_path(self):
         p = self.host_prefix + self.collection_path
-        # p = p.replace("//", "/")
         return p
 
     def __get_children_mappings(self):

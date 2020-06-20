@@ -1,4 +1,5 @@
-from pyDTS.collections import Collections, Constants
+from pyDTS.collections import Collections
+from pyDTS.constants import EndpointConstants, CollectionsConstants
 
 
 class BaseEndpoint:
@@ -18,9 +19,12 @@ class BaseEndpoint:
             path (str, optional): The relative path on the server to the API entry point. Defaults to "/dts/api/".
             host_prefix (str, optional): The host address. Defaults to "localhost".
         """
-        self.__endpoint_path = path
-        self.__collections = Collections(self.endpoint_path + "collections/")
-        self.__host_prefix = host_prefix
+        EndpointConstants.set_host_prefix(host_prefix)
+        EndpointConstants.set_endpoint_path(path)
+        EndpointConstants.set_collections_path(path + "collections/")
+        EndpointConstants.set_navigation_path(path + "navigation/")
+        EndpointConstants.set_documents_path(path + "documents/")
+        self.__collections = Collections()
 
     @property
     def entrypoint_response(self):
@@ -32,16 +36,16 @@ class BaseEndpoint:
             dict: JSON style (jsonifyable) key-value-pairs.
         """
         return {
-            "@context": f"{self.__endpoint_path}contexts/EntryPoint.jsonld",
+            "@context": f"{self.endpoint_path}contexts/EntryPoint.jsonld",
             "@id": self.absolute_path,
             "@type": "EntryPoint",
             "collections": self.__collections.absolute_path,
-            "documents": f"{self.__endpoint_path}documents/",   # LATER: implement
-            "navigation": f"{self.__endpoint_path}navigation/"  # LATER: implement
+            "documents": f"{EndpointConstants.get_endpoint_path()}documents/",   # LATER: implement
+            "navigation": f"{EndpointConstants.get_endpoint_path()}navigation/"  # LATER: implement
         }
 
     @property
-    def endpoint_path(self):
+    def endpoint_path(self):  # TODO: remove?
         """Endpoint Path
 
         relative path to the API entry point.
@@ -50,10 +54,10 @@ class BaseEndpoint:
         Returns:
             str: path
         """
-        return self.__endpoint_path
+        return EndpointConstants.get_endpoint_path()
 
     @property
-    def collections_path(self):
+    def collections_path(self):  # TODO: remove?
         """Collections path.
 
         Path to the Collections entry point.
@@ -62,7 +66,7 @@ class BaseEndpoint:
         Returns:
             str: path
         """
-        return self.__collections.collection_path
+        return EndpointConstants.get_collections_path()
 
     @property
     def absolute_path(self):
@@ -86,14 +90,13 @@ class BaseEndpoint:
         Returns:
             str: prefix
         """
-        return self.__host_prefix
+        return EndpointConstants.get_host_prefix()
 
     @host_prefix.setter
     def host_prefix(self, prefix):
-        self.__host_prefix = prefix
-        self.__collections.host_prefix = prefix
+        EndpointConstants.set_host_prefix(prefix)
 
-    def get_collections_response(self, id=None, page=None, nav=Constants.NAV_CHILDREN):
+    def get_collections_response(self, id=None, page=None, nav=CollectionsConstants.NAV_CHILDREN):
         """Collections Response
 
         Property to forward the collections' get_response.
