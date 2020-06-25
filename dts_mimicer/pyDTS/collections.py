@@ -38,6 +38,18 @@ class AbstractCollectionItem(ABC):
     def get_members(self, nav):
         pass
 
+    def get_member(self, nav):
+        return {
+            "@id": self.id,
+            "@type": self.type,
+            "title": self.title,
+            "description": self.description,
+            "totalItems": len(self.children) if nav == CollectionsConstants.NAV_CHILDREN else len(self.parent),
+            "dts:totalParents": len(self.parent),
+            "dts:totalChildren": len(self.children),
+            "mimicker:uri": self.uri  # LATER: remove, not DTS
+        }
+
     @property
     def parent_member(self):
         if self.parent:
@@ -104,6 +116,11 @@ class AbstractCollectionItem(ABC):
     def match_id(self, id):
         return self.id == id  # QUESTION: should I also allow fuzzy match?
 
+    @property
+    def uri(self):
+        return EndpointConstants.get_host_prefix() + \
+               EndpointConstants.get_collections_path() + "?id=" + self.id
+
 
 class Collection(AbstractCollectionItem):
     def __init__(self, id, parent, children, title, description):
@@ -113,17 +130,6 @@ class Collection(AbstractCollectionItem):
                                          type=CollectionsConstants.TYPE_COLLECTION,
                                          title=title,
                                          description=description)
-
-    def get_member(self, nav):  # TODO: make partially abstract
-        return {
-            "@id": self.id,
-            "@type": self.type,
-            "title": self.title,
-            "description": self.description,
-            "totalItems": len(self.children) if nav == CollectionsConstants.NAV_CHILDREN else len(self.parent),
-            "dts:totalParents": len(self.parent),
-            "dts:totalChildren": len(self.children)
-        }
 
     def get_members(self, nav):
         if nav == CollectionsConstants.NAV_CHILDREN:
@@ -181,20 +187,13 @@ class Resource(AbstractCollectionItem):
             return self.parent_member
 
     def get_member(self, nav):
-        return {
-            "@id": self.id,
-            "@type": self.type,
-            "title": self.title,
-            "description": self.description,
-            "totalItems": len(self.children) if nav == CollectionsConstants.NAV_CHILDREN else len(self.parent),
-            "dts:totalParents": len(self.parent),
-            "dts:totalChildren": len(self.children),
-            "dts:passage": self.passage,  # TODO: correct?
-            "dts:references": self.references,  # TODO: correct?
-            "dts:download": self.download,
-            "dts:citeDepth": self.cite_depth,  # TODO: add
-            "dts:citeStructure": self.cite_structure  # TODO: add
-        }
+        res = super(Resource, self).get_member(nav)
+        res["dts:passage"] = self.passage
+        res["dts:references"] = self.references
+        res["dts:download"] = self.download
+        res["dts:citeDepth"] = self.cite_depth  # TODO: add
+        res["dts:citeStructure"] = self.cite_structure  # TODO: add
+        return res
 
 
 class Collections:
