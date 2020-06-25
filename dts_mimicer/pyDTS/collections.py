@@ -1,13 +1,9 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from pyDTS.constants import CollectionsConstants, EndpointConstants
-
-
-# QUESTION: Does Resource have members? might be relevant when navigation "parent"
 
 # LATER: missing attributes: dublincore, extensions
 
 # TODO: add docstring
-# TODO: add header with author and license to all files
 
 
 class AbstractCollectionItem(ABC):
@@ -22,6 +18,25 @@ class AbstractCollectionItem(ABC):
 
     def __str__(self):
         return f"<{self.type}: {self.id} -- {self.title} -- {self.description}>"
+
+    def get_response(self, page, nav):
+        res = {
+            "@context": CollectionsConstants.CONTEXT,
+            "@id": self.id,
+            "@type": self.type,
+            "title": self.title,
+            "description": self.description,
+            "totalItems": len(self.children) if nav == CollectionsConstants.NAV_CHILDREN else len(self.parent),
+            "dts:totalParents": len(self.parent),
+            "dts:totalChildren": len(self.children)
+        }
+        if self.get_members(nav):
+            res["member"] = self.get_members(nav)
+        return res
+
+    @abstractmethod
+    def get_members(self, nav):
+        pass
 
     @property
     def parent_member(self):
@@ -99,22 +114,7 @@ class Collection(AbstractCollectionItem):
                                          title=title,
                                          description=description)
 
-    # TODO: check, which further methods can be made abstract
-
-    def get_response(self, page, nav):
-        return {
-            "@context": CollectionsConstants.CONTEXT,
-            "@id": self.id,
-            "@type": self.type,
-            "title": self.title,
-            "description": self.description,
-            "totalItems": len(self.children) if nav == CollectionsConstants.NAV_CHILDREN else len(self.parent),
-            "dts:totalParents": len(self.parent),
-            "dts:totalChildren": len(self.children),
-            "member": self.get_members(nav)
-        }
-
-    def get_member(self, nav):
+    def get_member(self, nav):  # TODO: make partially abstract
         return {
             "@id": self.id,
             "@type": self.type,
@@ -136,42 +136,23 @@ class Collection(AbstractCollectionItem):
 
 
 class Resource(AbstractCollectionItem):
-    def __init__(self, id, parent, title, description):
+    def __init__(self, id, parent, title, description, download_uri):
         super(Resource, self).__init__(id=id,
                                        parent=parent,
                                        children=[],
                                        type=CollectionsConstants.TYPE_RESOURCE,
                                        title=title,
                                        description=description)
+        self.__download_uri = download_uri
 
     def get_response(self, page, nav):
-        return {
-            "@context": CollectionsConstants.CONTEXT,
-            "@id": self.id,
-            "@type": self.type,
-            "title": self.title,
-            "description": self.description,
-            "totalItems": len(self.children) if nav == CollectionsConstants.NAV_CHILDREN else len(self.parent),
-            "dts:totalParents": len(self.parent),
-            "dts:totalChildren": len(self.children),
-            "dts:passage": self.passage,
-            "dts:references": self.references,
-            "dts:download": self.download,
-            "dts:citeDepth": self.cite_depth,  # TODO: add
-            "dts:citeStructure": self.cite_structure  # TODO: add
-            # "member": self.get_members(nav)
-        }
-
-    # def get_member(self, nav):  # TODO: make resource specific
-    #     return {
-    #         "@id": self.id,
-    #         "title": self.title,
-    #         "description": self.description,
-    #         "@type": self.type,
-    #         "totalItems": len(self.children) if nav == Constants.NAV_CHILDREN else len(self.parent),
-    #         "dts:totalParents": len(self.parent),
-    #         "dts:totalChildren": len(self.children)
-    #     }
+        res = super(Resource, self).get_response(page, nav)
+        res["dts:passage"] = self.passage
+        res["dts:references"] = self.references
+        res["dts:download"] = self.download
+        res["dts:citeDepth"] = self.cite_depth  # TODO: add
+        res["dts:citeStructure"] = self.cite_structure  # TODO: add
+        return res
 
     @property
     def passage(self):
@@ -183,7 +164,7 @@ class Resource(AbstractCollectionItem):
 
     @property
     def download(self):
-        return "todo!"  # TODO: add
+        return self.__download_uri
 
     @property
     def cite_depth(self):
@@ -193,7 +174,7 @@ class Resource(AbstractCollectionItem):
     def cite_structure(self):
         return "todo!"  # TODO: add
 
-    def get_members(self, nav):  # TODO: make resource specific
+    def get_members(self, nav):
         if nav == CollectionsConstants.NAV_CHILDREN:
             return self.children_members
         else:
@@ -210,7 +191,7 @@ class Resource(AbstractCollectionItem):
             "dts:totalChildren": len(self.children),
             "dts:passage": self.passage,  # TODO: correct?
             "dts:references": self.references,  # TODO: correct?
-            "dts:download": self.download,  # TODO: add
+            "dts:download": self.download,
             "dts:citeDepth": self.cite_depth,  # TODO: add
             "dts:citeStructure": self.cite_structure  # TODO: add
         }
@@ -276,7 +257,8 @@ class Collections:
         res_1 = Resource(id="sample_res_01",
                          parent=[col_1],
                          title="Sample Resource 1",
-                         description="Sample Textual Resource")
+                         description="Sample Textual Resource",
+                         download_uri="sam://ple.uri")  # TODO: add something sensible
         col_1.add_child(res_1)
         return [
             col_1,
